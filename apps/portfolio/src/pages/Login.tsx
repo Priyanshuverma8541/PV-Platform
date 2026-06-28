@@ -25,10 +25,24 @@ function Login() {
       <h1>Sign in</h1>
       <form onSubmit={handleSubmit} className="form-grid">
         <FormField label="Email">
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
         </FormField>
         <FormField label="Password">
-          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <input
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
         </FormField>
         <button type="submit" className="primary-button">
           Login

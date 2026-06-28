@@ -5,6 +5,12 @@ packages:
   - 'pv-core'
   - 'pv-core/*'
 
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild
+
 settings:
   lockfileVersion: v9
   autoInstallPeers: true

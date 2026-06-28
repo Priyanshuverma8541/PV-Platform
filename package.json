@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "PV Ecosystem - Comprehensive business platform",
   "private": true,
+  "packageManager": "npm@11.14.1",
+  "workspaces": [
+    "apps/*",
+    "backend/*",
+    "packages/*"
+  ],
   "type": "module",
   "scripts": {
     "dev": "turbo run dev --parallel",
@@ -36,8 +42,5 @@
     "prettier": "^3.0.0",
     "turbo": "latest",
     "typescript": "^5.0.0"
-  },
-  "pnpm": {
-    "overrides": {}
   }
 }

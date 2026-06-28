@@ -23,13 +23,34 @@ function Register() {
       <h1>Create account</h1>
       <form onSubmit={handleSubmit} className="form-grid">
         <FormField label="Name">
-          <input type="text" value={name} onChange={(event) => setName(event.target.value)} required />
+          <input
+            type="text"
+            name="name"
+            autoComplete="name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
         </FormField>
         <FormField label="Email">
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
         </FormField>
         <FormField label="Password">
-          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <input
+            type="password"
+            name="new-password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
         </FormField>
         <button type="submit" className="primary-button">
           Register

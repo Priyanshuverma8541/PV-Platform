@@ -1,10 +1,9 @@
 import dotenv from 'dotenv';
 
+dotenv.config({ path: new URL('../../../../.env', import.meta.url) });
 dotenv.config();
 
 const requiredEnv = [
-  'PORT',
-  'DATABASE_URL',
   'JWT_SECRET',
   'CLIENT_URL',
   'GITHUB_CLIENT_ID',
@@ -19,9 +18,14 @@ for (const key of requiredEnv) {
   }
 }
 
+const databaseUrl = process.env.DATABASE_URL ?? process.env.MONGO_URI;
+if (!databaseUrl) {
+  throw new Error('Missing required environment variable: DATABASE_URL or MONGO_URI');
+}
+
 const config = {
-  PORT: Number(process.env.PORT ?? 4000),
-  DATABASE_URL: process.env.DATABASE_URL as string,
+  PORT: Number(process.env.AUTH_SERVICE_PORT ?? process.env.PORT ?? 4000),
+  DATABASE_URL: databaseUrl,
   JWT_SECRET: process.env.JWT_SECRET as string,
   CLIENT_URL: process.env.CLIENT_URL as string,
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID as string,
