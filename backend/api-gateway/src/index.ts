@@ -9,7 +9,6 @@ dotenv.config();
 const app = express();
 const PORT = config.PORT;
 
-app.use(express.json());
 app.use(
   cors({
     origin: config.CLIENT_URL,
@@ -17,14 +16,20 @@ app.use(
   })
 );
 
+// NOTE: Do NOT add express.json() before the proxy — it consumes the body
+// and the proxy can no longer forward it. Parse JSON only on non-proxied routes.
+
 app.use(
   '/api/auth',
   createProxyMiddleware({
     target: config.AUTH_SERVICE_URL,
     changeOrigin: true,
-    pathRewrite: { '^/api/auth': '/api/auth' },
+    // No pathRewrite needed: gateway receives /api/auth/register
+    // and auth-service also handles /api/auth/register
   })
 );
+
+app.use(express.json());
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'api-gateway' });

@@ -1,6 +1,12 @@
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { resolve, dirname } from 'path';
 
-dotenv.config({ path: new URL('../../../../.env', import.meta.url) });
+// Load root .env first (absolute path, works in both dev and built)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const rootEnvPath = resolve(__dirname, '../../../../.env');
+dotenv.config({ path: rootEnvPath });
+// Then load any local .env (overrides root)
 dotenv.config();
 
 const requiredEnv = [

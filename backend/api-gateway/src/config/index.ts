@@ -1,6 +1,10 @@
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { resolve, dirname } from 'path';
 
-dotenv.config({ path: new URL('../../../../.env', import.meta.url) });
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const rootEnvPath = resolve(__dirname, '../../../../.env');
+dotenv.config({ path: rootEnvPath });
 dotenv.config();
 
 const requiredEnv = ['CLIENT_URL', 'AUTH_SERVICE_URL'];
