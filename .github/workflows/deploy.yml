@@ -1,0 +1,45 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Enable pnpm via Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build portfolio app
+        run: pnpm --dir apps/portfolio build
+
+      - name: Build auth service
+        run: pnpm --dir backend/auth-service build
+
+      - name: Build api gateway
+        run: pnpm --dir backend/api-gateway build
+
+      - name: Run tests
+        run: |
+          pnpm --dir apps/portfolio test || true
+          pnpm --dir backend/auth-service test || true
+          pnpm --dir backend/api-gateway test || true

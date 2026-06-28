@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: pv-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - pv-network
+    healthcheck:
+      test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: pv-auth-service
+    ports:
+      - '4000:4000'
+    environment:
+      - PORT=4000
+      - DATABASE_URL=mongodb://mongo:27017/pv_ecosystem
+      - JWT_SECRET=your_jwt_secret_key_here
+      - CLIENT_URL=http://localhost:5173
+      - GITHUB_CLIENT_ID=your_github_client_id
+      - GITHUB_CLIENT_SECRET=your_github_client_secret
+      - GOOGLE_CLIENT_ID=your_google_client_id
+      - GOOGLE_CLIENT_SECRET=your_google_client_secret
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - pv-network
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: pv-api-gateway
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - CLIENT_URL=http://localhost:5173
+      - AUTH_SERVICE_URL=http://auth-service:4000
+    depends_on:
+      auth-service:
+        condition: service_started
+    networks:
+      - pv-network
+
+  portfolio:
+    build:
+      context: ./apps/portfolio
+      dockerfile: Dockerfile
+    container_name: pv-portfolio
+    ports:
+      - '5173:80'
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - pv-network
+
+volumes:
+  mongo_data:
+
+networks:
+  pv-network:
+    driver: bridge

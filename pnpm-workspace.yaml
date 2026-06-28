@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'backend/*'
+  - 'packages/*'
+  - 'pv-core'
+  - 'pv-core/*'
+
+settings:
+  lockfileVersion: v9
+  autoInstallPeers: true

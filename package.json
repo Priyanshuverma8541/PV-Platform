@@ -1,0 +1,43 @@
+{
+  "name": "pv-ecosystem",
+  "version": "1.0.0",
+  "description": "PV Ecosystem - Comprehensive business platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:frontend": "cd apps/portfolio && npm run dev",
+    "dev:auth": "cd backend/auth-service && npm run dev",
+    "dev:gateway": "cd backend/api-gateway && npm run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules .turbo dist",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "deploy:github": "echo 'GitHub Actions are configured in .github/workflows/deploy.yml'"
+  },
+  "keywords": [
+    "monorepo",
+    "platform",
+    "erp",
+    "crm",
+    "portfolio"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@turbo/gen": "latest",
+    "@types/node": "^20.14.2",
+    "pnpm": "^10.34.4",
+    "prettier": "^3.0.0",
+    "turbo": "latest",
+    "typescript": "^5.0.0"
+  },
+  "pnpm": {
+    "overrides": {}
+  }
+}
