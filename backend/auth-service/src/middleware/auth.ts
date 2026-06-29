@@ -1,7 +1,7 @@
-import { Response, NextFunction } from 'express';
+﻿import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config/index.js';
-import type { AuthenticatedRequest } from '../types/express';
+import type { AuthenticatedRequest } from '../types/express.js';
 
 interface JwtPayload {
   userId: string;
@@ -24,3 +24,4 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     return res.status(401).json({ message: 'Invalid or expired token.' });
   }
 }
+
