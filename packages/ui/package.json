@@ -1,0 +1,10 @@
+{
+  "name": "@pv/ui",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "files": [
+    "src",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ]
+}

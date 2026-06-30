@@ -38,8 +38,11 @@
   "devDependencies": {
     "@turbo/gen": "latest",
     "@types/node": "^20.14.2",
+    "autoprefixer": "^10.5.2",
     "pnpm": "^10.34.4",
+    "postcss": "^8.5.16",
     "prettier": "^3.0.0",
+    "tailwindcss": "^4.3.2",
     "turbo": "latest",
     "typescript": "^5.0.0"
   }
