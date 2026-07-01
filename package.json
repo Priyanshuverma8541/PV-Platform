@@ -3,11 +3,18 @@
   "version": "1.0.0",
   "description": "PV Ecosystem - Comprehensive business platform",
   "private": true,
-  "packageManager": "npm@11.14.1",
+  "packageManager": "pnpm@10.34.4",
   "workspaces": [
     "apps/*",
     "backend/*",
-    "packages/*"
+    "packages/*",
+    "pv-core",
+    "database",
+    "cloudinary",
+    "ai",
+    "scripts",
+    "tests",
+    "tools"
   ],
   "type": "module",
   "scripts": {

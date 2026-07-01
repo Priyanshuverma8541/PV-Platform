@@ -1,5 +1,5 @@
 {
-  "name": "@pv/auth",
+  "name": "@pv/ai",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,8 +8,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
+  "dependencies": {
+    "@pv/types": "workspace:*",
+    "@pv/api-client": "workspace:*"
+  },
   "devDependencies": {
-    "@types/node": "^20.14.2",
     "typescript": "^5.5.0"
   }
 }

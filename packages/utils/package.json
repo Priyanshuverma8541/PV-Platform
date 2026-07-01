@@ -1,5 +1,5 @@
 {
-  "name": "@pv/auth",
+  "name": "@pv/utils",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,6 @@
     "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
     "typescript": "^5.5.0"
   }
 }

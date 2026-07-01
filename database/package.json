@@ -1,0 +1,20 @@
+{
+  "name": "pv-database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "mongoose": "^7.7.0",
+    "dotenv": "^16.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.5.0",
+    "tsx": "^4.20.6"
+  }
+}
