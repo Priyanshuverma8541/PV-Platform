@@ -3,7 +3,6 @@ packages:
   - 'backend/*'
   - 'packages/*'
   - 'pv-core'
-  - 'pv-core/*'
 
 allowBuilds:
   esbuild: true

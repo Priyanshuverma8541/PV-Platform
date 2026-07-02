@@ -5,6 +5,3 @@ export * from './components/Card.tsx';
 export * from './components/Layout.tsx';
 export * from './components/Table.tsx';
 
-// Styles
-export * from './styles.css';
-
