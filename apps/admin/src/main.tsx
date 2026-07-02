@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from '@pv/hooks';
 import { apiClient } from '@pv/api-client';
-import '@pv/ui/styles.css';
+import './styles.css';
 
 // Initialize API client with base URL
 apiClient.setToken(localStorage.getItem('auth_token') || '');
