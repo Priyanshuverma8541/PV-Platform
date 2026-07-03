@@ -281,3 +281,211 @@ export interface AnalyticsEvent {
   metadata: Record<string, any>;
   timestamp: Date;
 }
+
+// Mission Control / Dashboard types
+export interface DashboardWidget {
+  id: string;
+  type: 'stat' | 'chart' | 'list' | 'calendar' | 'progress' | 'activity';
+  title: string;
+  size: 'small' | 'medium' | 'large';
+  position: { x: number; y: number };
+  data: any;
+  refreshInterval?: number;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  dueDate?: Date;
+  completedAt?: Date;
+  tags: string[];
+  projectId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateTaskInput {
+  title: string;
+  description?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  dueDate?: Date;
+  tags?: string[];
+  projectId?: string;
+}
+
+// Career types
+export interface JobApplication {
+  id: string;
+  company: string;
+  position: string;
+  status: 'applied' | 'screening' | 'interview' | 'offer' | 'rejected' | 'accepted';
+  appliedDate: Date;
+  source?: string;
+  salary?: {
+    min?: number;
+    max?: number;
+    currency: string;
+  };
+  location?: string;
+  remote: boolean;
+  notes?: string;
+  interviews: Interview[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Interview {
+  id: string;
+  type: 'phone' | 'video' | 'onsite' | 'technical' | 'hr';
+  date: Date;
+  duration?: number;
+  notes?: string;
+  feedback?: string;
+  interviewer?: string;
+}
+
+export interface Resume {
+  id: string;
+  title: string;
+  content: any; // JSON resume format
+  template: string;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Learning types
+export interface Course {
+  id: string;
+  title: string;
+  provider: string;
+  description?: string;
+  thumbnail?: string;
+  progress: number;
+  status: 'not_started' | 'in_progress' | 'completed' | 'paused';
+  enrolledAt: Date;
+  completedAt?: Date;
+  certificateUrl?: string;
+  skills: string[];
+}
+
+export interface SkillProgress {
+  skill: string;
+  level: number;
+  targetLevel: number;
+  hoursSpent: number;
+  lastPracticed: Date;
+}
+
+// CRM types
+export interface Contact {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  position?: string;
+  source: 'website' | 'referral' | 'social' | 'cold_outreach' | 'other';
+  status: 'lead' | 'prospect' | 'customer' | 'partner' | 'inactive';
+  tags: string[];
+  notes?: string;
+  interactions: Interaction[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Interaction {
+  id: string;
+  type: 'email' | 'call' | 'meeting' | 'note';
+  date: Date;
+  summary: string;
+  outcome?: string;
+  nextSteps?: string;
+}
+
+export interface Deal {
+  id: string;
+  title: string;
+  value: number;
+  currency: string;
+  stage: 'qualification' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
+  probability: number;
+  contactId: string;
+  expectedCloseDate?: Date;
+  closedAt?: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Finance types
+export interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  currency: string;
+  description: string;
+  date: Date;
+  projectId?: string;
+  receipt?: string;
+  tags: string[];
+  createdAt: Date;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  clientId: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  currency: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  issueDate: Date;
+  dueDate: Date;
+  paidAt?: Date;
+  notes?: string;
+}
+
+export interface InvoiceItem {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+// Blog types
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  coverImage?: string;
+  tags: string[];
+  published: boolean;
+  publishedAt?: Date;
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Notification types (enhanced)
+export interface AppNotification {
+  id: string;
+  userId: string;
+  app: string;
+  type: string;
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  read: boolean;
+  readAt?: Date;
+  createdAt: Date;
+}

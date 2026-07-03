@@ -16,5 +16,9 @@
   "files": ["src"],
   "peerDependencies": {
     "react": "^18.3.1"
+  },
+  "dependencies": {
+    "framer-motion": "^10.18.0",
+    "lucide-react": "^0.344.0"
   }
 }

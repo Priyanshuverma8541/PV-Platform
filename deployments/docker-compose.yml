@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # MongoDB Database
   mongodb:
     image: mongo:7.0
     container_name: pv-mongodb
@@ -8,25 +9,40 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITID_ROOT_USERNAME: admin
-      MONGO_INITID_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: pv-platform
     volumes:
       - mongodb_data:/data/db
     networks:
       - pv-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
+  # Redis Cache (Future)
   redis:
     image: redis:7-alpine
     container_name: pv-redis
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - pv-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
+  # API Gateway
   api-gateway:
     build:
-      context: ../backend/api-gateway
+      context: ../../backend/api-gateway
       dockerfile: Dockerfile
     container_name: pv-api-gateway
     restart: always
@@ -35,51 +51,181 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - AUTH_SERVICE_URL=http://auth-service:3001
+      - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+      - JWT_SECRET=your-jwt-secret-change-in-production
       - CLIENT_URL=http://localhost:5173
+      - AUTH_SERVICE_URL=http://auth-service:4000
+      - AI_SERVICE_URL=http://ai-service:5000
+      - MEDIA_SERVICE_URL=http://media-service:5001
     depends_on:
-      - auth-service
+      mongodb:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     networks:
       - pv-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Auth Service
   auth-service:
     build:
-      context: ../backend/auth-service
+      context: ../../backend/auth-service
       dockerfile: Dockerfile
     container_name: pv-auth-service
     restart: always
     ports:
-      - "3001:3001"
+      - "4000:4000"
     environment:
       - NODE_ENV=production
-      - PORT=3001
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/pv_ecosystem?authSource=admin
-      - JWT_SECRET=${JWT_SECRET}
-      - REDIS_URL=redis://redis:6379
+      - PORT=4000
+      - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+      - JWT_SECRET=your-jwt-secret-change-in-production
+      - CLIENT_URL=http://localhost:5173
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
     networks:
       - pv-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  portfolio:
+  # AI Service
+  ai-service:
     build:
-      context: ../apps/portfolio
+      context: ../../backend/ai-service
       dockerfile: Dockerfile
-    container_name: pv-portfolio
+    container_name: pv-ai-service
     restart: always
     ports:
-      - "5173:5173"
+      - "5000:5000"
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=http://localhost:3000
+      - PORT=5000
+      - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+      - JWT_SECRET=your-jwt-secret-change-in-production
+      - AI_PROVIDER=gemini
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     depends_on:
-      - api-gateway
+      mongodb:
+        condition: service_healthy
     networks:
       - pv-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Media Service
+  media-service:
+    build:
+      context: ../../backend/media-service
+      dockerfile: Dockerfile
+    container_name: pv-media-service
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+      - JWT_SECRET=your-jwt-secret-change-in-production
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - media_uploads:/app/uploads
+    networks:
+      - pv-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Notification Service (Phase 2)
+  # notification-service:
+  #   build:
+  #     context: ../../backend/notification-service
+  #     dockerfile: Dockerfile
+  #   container_name: pv-notification-service
+  #   restart: always
+  #   ports:
+  #     - "5002:5002"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=5002
+  #     - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+  #     - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+  #     - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+  #     - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - pv-network
+
+  # Search Service (Phase 2)
+  # search-service:
+  #   build:
+  #     context: ../../backend/search-service
+  #     dockerfile: Dockerfile
+  #   container_name: pv-search-service
+  #   restart: always
+  #   ports:
+  #     - "5003:5003"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=5003
+  #     - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - pv-network
+
+  # Analytics Service (Phase 2)
+  # analytics-service:
+  #   build:
+  #     context: ../../backend/analytics-service
+  #     dockerfile: Dockerfile
+  #   container_name: pv-analytics-service
+  #   restart: always
+  #   ports:
+  #     - "5004:5004"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=5004
+  #     - DATABASE_URL=mongodb://admin:password123@mongodb:27017/pv-platform?authSource=admin
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - pv-network
 
 volumes:
   mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  media_uploads:
+    driver: local
 
 networks:
   pv-network:

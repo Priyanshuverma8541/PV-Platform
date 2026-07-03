@@ -51,14 +51,14 @@ export class AuthenticationService {
   generateToken(userId: string, email: string): AuthToken {
     const token = jwt.sign(
       { userId, email },
-      this.jwtSecret,
-      { expiresIn: this.jwtExpiration }
+      this.jwtSecret as jwt.Secret,
+      { expiresIn: this.jwtExpiration } as jwt.SignOptions
     );
 
     const refreshToken = jwt.sign(
       { userId, email, type: 'refresh' },
-      this.jwtSecret,
-      { expiresIn: '30d' }
+      this.jwtSecret as jwt.Secret,
+      { expiresIn: '30d' } as jwt.SignOptions
     );
 
     return {
@@ -76,7 +76,7 @@ export class AuthenticationService {
     }
   }
 
-  async validateUser(email: string, password: string, user: User): Promise<boolean> {
+  async validateUser(_email: string, password: string, user: User): Promise<boolean> {
     if (!user.password) return false;
     return this.comparePassword(password, user.password);
   }

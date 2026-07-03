@@ -14,7 +14,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "types": ["node", "mongoose"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

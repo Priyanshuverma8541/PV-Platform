@@ -1,47 +1,32 @@
 import { useState } from 'react';
-import { Layout, Header, Container } from '@pv/ui';
-import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './pages/Dashboard';
-import { Users } from './pages/Users';
-import { Settings } from './pages/Settings';
-import { Apps } from './pages/Apps';
+import { MissionControl } from './pages/MissionControl';
 
-type Page = 'dashboard' | 'users' | 'apps' | 'settings';
+type Page = 'landing' | 'mission-control';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [currentPage, setCurrentPage] = useState<Page>('landing');
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'users':
-        return <Users />;
-      case 'apps':
-        return <Apps />;
-      case 'settings':
-        return <Settings />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page as Page);
-  };
+  if (currentPage === 'mission-control') {
+    return <MissionControl />;
+  }
 
   return (
-    <Layout>
-      <div className="flex h-screen">
-        <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title="Admin Dashboard" />
-          <Container className="flex-1 overflow-auto">
-            {renderPage()}
-          </Container>
-        </div>
+    <div>
+      <div className="text-center py-20">
+        <h1 className="text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-6">
+          PV Platform
+        </h1>
+        <p className="text-xl text-gray-300 mb-8">
+          Your Personal Operating System
+        </p>
+        <button
+          onClick={() => setCurrentPage('mission-control')}
+          className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full font-semibold text-lg hover:scale-105 transition-transform"
+        >
+          Enter Mission Control
+        </button>
       </div>
-    </Layout>
+    </div>
   );
 }
 

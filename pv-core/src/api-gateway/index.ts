@@ -18,16 +18,12 @@ export interface GatewayConfig {
 
 export class APIGateway {
   private routes: Map<string, RouteConfig> = new Map();
-  private config: Required<GatewayConfig>;
 
   constructor(config?: GatewayConfig) {
-    this.config = {
-      routes: config?.routes || [],
-      defaultRateLimit: config?.defaultRateLimit || {
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 100
-      }
-    };
+    // Config is available for future use
+    if (config?.routes) {
+      config.routes.forEach(route => this.routes.set(route.path, route));
+    }
   }
 
   registerRoute(route: RouteConfig): void {

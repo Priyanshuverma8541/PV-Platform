@@ -5,20 +5,10 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
-    }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
-  },
   "dependencies": {
-    "@pv/types": "workspace:*",
-    "@pv/utils": "workspace:*"
+    "axios": "^1.6.2"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "@types/axios": "^0.14.0"
   }
 }

@@ -1,25 +1,20 @@
-import express from 'express';
-import cors from 'cors';
-import routes from './routes/index.js';
-import { errorHandler } from './middleware/error.js';
-import config from './config/index.js';
+import { Server } from 'http';
+import app from './index';
 
-const app = express();
+let server: Server | null = null;
 
-app.use(express.json());
-app.use(
-  cors({
-    origin: config.CLIENT_URL,
-    credentials: true,
-  })
-);
+export const startAuthService = async (): Promise<Server> => {
+  if (!server) {
+    server = app.listen(process.env.AUTH_SERVICE_PORT || 4000, () => {
+      console.log('Auth service started');
+    });
+  }
+  return server;
+};
 
-app.use('/api', routes);
-
-app.get('/', (_req, res) => {
-  res.json({ status: 'ok', service: 'auth-service' });
-});
-
-app.use(errorHandler);
-
-export default app;
+export const stopAuthService = async (): Promise<void> => {
+  if (server) {
+    await new Promise((resolve) => server!.close(resolve));
+    server = null;
+  }
+};
