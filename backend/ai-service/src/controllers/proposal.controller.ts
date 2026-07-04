@@ -1,7 +1,7 @@
 import type { Response, NextFunction } from 'express';
-import { routeAIRequest } from '../services/aiRouter.service.js';
-import { buildPrompt } from '../services/prompt.service.js';
-import type { AuthenticatedRequest } from '../types/index.js';
+import { routeAIRequest } from '../services/aiRouter.service';
+import { buildPrompt } from '../services/prompt.service';
+import type { AuthenticatedRequest } from '../types/index';
 
 export async function generateProposal(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {

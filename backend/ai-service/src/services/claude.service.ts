@@ -1,4 +1,4 @@
-import type { AIRequest, AIResponse } from '../types/index.js';
+import type { AIRequest, AIResponse } from '../types/index';
 
 /**
  * Anthropic Claude provider — plug in when you add ANTHROPIC_API_KEY.

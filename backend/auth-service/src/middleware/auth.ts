@@ -1,7 +1,7 @@
 ﻿import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import config from '../config/index.js';
-import type { AuthenticatedRequest } from '../types/express.js';
+import config from '../config/index';
+import type { AuthenticatedRequest } from '../types/express';
 
 interface JwtPayload {
   userId: string;

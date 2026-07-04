@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import Media from '../models/media.model.js';
+import Media from '../models/media.model';
 import { eventBus, EventTypes } from 'pv-core';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 
 export class MediaController {
   async uploadFile(req: Request, res: Response): Promise<void> {

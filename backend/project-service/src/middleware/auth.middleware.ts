@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'WEARELEARNINGJWT';
@@ -28,7 +28,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email?: string };
       
       // Add user to request (user validation done by auth service)
       req.user = {

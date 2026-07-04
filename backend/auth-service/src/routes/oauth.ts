@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { githubAuth, googleAuth, oauthCallback } from '../controllers/oauth.controller.js';
+import { githubAuth, googleAuth, oauthCallback } from '../controllers/oauth.controller';
 
 const router = Router();
 

@@ -5,10 +5,11 @@ packages:
   - 'pv-core'
 
 allowBuilds:
-  esbuild: true
+  esbuild: set this to true or false
 
 onlyBuiltDependencies:
   - esbuild
+  - sharp
 
 settings:
   lockfileVersion: v9

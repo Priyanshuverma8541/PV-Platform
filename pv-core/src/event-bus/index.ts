@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Event Bus - Internal event-driven architecture
  * Enables loose coupling between services through events
  */
@@ -109,6 +109,11 @@ export const eventBus = new EventBus();
 
 // Common event types
 export const EventTypes = {
+  // Service events
+  SERVICE_STARTED: 'service.started',
+  SERVICE_STOPPED: 'service.stopped',
+  SERVICE_SHUTDOWN: 'service.shutdown',
+  
   // User events
   USER_REGISTERED: 'user.registered',
   USER_LOGGED_IN: 'user.logged_in',

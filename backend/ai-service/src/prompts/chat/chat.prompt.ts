@@ -1,4 +1,4 @@
-import type { BuiltPrompt } from '../../services/prompt.service.js';
+import type { BuiltPrompt } from '../../services/prompt.service';
 
 export function chatPrompt(data: Record<string, unknown>): BuiltPrompt {
   return {

@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -13,9 +13,9 @@ const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pv-platf
 const connectDatabase = async (): Promise<void> => {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ MongoDB connected successfully');
+    console.log('âœ… MongoDB connected successfully');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -52,14 +52,23 @@ const startServer = async () => {
     await connectDatabase();
 
     // Start listening
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Auth Service running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
+
+    return server;
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-startServer();
+// Export for testing and programmatic use
+export default app;
+export { startServer };
+
+// Start if run directly
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}

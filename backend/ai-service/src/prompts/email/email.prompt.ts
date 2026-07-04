@@ -1,4 +1,4 @@
-import type { BuiltPrompt } from '../../services/prompt.service.js';
+import type { BuiltPrompt } from '../../services/prompt.service';
 
 export function emailPrompt(data: Record<string, unknown>): BuiltPrompt {
   const { type, recipient, context, tone, senderName } = data;

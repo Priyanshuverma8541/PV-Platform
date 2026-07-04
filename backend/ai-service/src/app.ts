@@ -1,15 +1,15 @@
 import express from 'express';
 import cors from 'cors';
-import env from './config/env.js';
-import logger from './utils/logger.js';
+import env from './config/env';
+import logger from './utils/logger';
 
-import chatRoutes from './routes/chat.routes.js';
-import resumeRoutes from './routes/resume.routes.js';
-import proposalRoutes from './routes/proposal.routes.js';
-import portfolioRoutes from './routes/portfolio.routes.js';
-import buildhubRoutes from './routes/buildhub.routes.js';
-import researchRoutes from './routes/research.routes.js';
-import usageRoutes from './routes/usage.routes.js';
+import chatRoutes from './routes/chat.routes';
+import resumeRoutes from './routes/resume.routes';
+import proposalRoutes from './routes/proposal.routes';
+import portfolioRoutes from './routes/portfolio.routes';
+import buildhubRoutes from './routes/buildhub.routes';
+import researchRoutes from './routes/research.routes';
+import usageRoutes from './routes/usage.routes';
 
 const app = express();
 

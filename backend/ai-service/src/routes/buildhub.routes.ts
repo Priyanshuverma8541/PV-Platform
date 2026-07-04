@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
-import { strictRateLimiter } from '../middleware/rateLimiter.js';
-import { routeAIRequest } from '../services/aiRouter.service.js';
-import { buildPrompt } from '../services/prompt.service.js';
-import type { AuthenticatedRequest } from '../types/index.js';
+import { requireAuth } from '../middleware/auth';
+import { strictRateLimiter } from '../middleware/rateLimiter';
+import { routeAIRequest } from '../services/aiRouter.service';
+import { buildPrompt } from '../services/prompt.service';
+import type { AuthenticatedRequest } from '../types/index';
 import type { Response, NextFunction } from 'express';
 
 const router = Router();

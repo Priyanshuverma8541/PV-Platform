@@ -7,15 +7,15 @@
  * them in a DB, you change this file — nowhere else.
  */
 
-import { resumePrompt } from '../prompts/resume/resume.prompt.js';
-import { proposalPrompt } from '../prompts/proposal/proposal.prompt.js';
-import { emailPrompt } from '../prompts/email/email.prompt.js';
-import { portfolioReviewPrompt } from '../prompts/portfolio/portfolio.prompt.js';
-import { buildhubPrompt } from '../prompts/buildhub/buildhub.prompt.js';
-import { crmPrompt } from '../prompts/crm/crm.prompt.js';
-import { careerCoachPrompt } from '../prompts/career/career.prompt.js';
-import { chatPrompt } from '../prompts/chat/chat.prompt.js';
-import type { AIFeature } from '../types/index.js';
+import { resumePrompt } from '../prompts/resume/resume.prompt';
+import { proposalPrompt } from '../prompts/proposal/proposal.prompt';
+import { emailPrompt } from '../prompts/email/email.prompt';
+import { portfolioReviewPrompt } from '../prompts/portfolio/portfolio.prompt';
+import { buildhubPrompt } from '../prompts/buildhub/buildhub.prompt';
+import { crmPrompt } from '../prompts/crm/crm.prompt';
+import { careerCoachPrompt } from '../prompts/career/career.prompt';
+import { chatPrompt } from '../prompts/chat/chat.prompt';
+import type { AIFeature } from '../types/index';
 
 export interface PromptInput {
   feature: AIFeature;

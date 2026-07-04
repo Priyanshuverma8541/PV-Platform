@@ -14,7 +14,6 @@ function App() {
   const [view, setView] = useState<View>('portfolio');
   const { user, signOut } = useAuthContext();
 
-  // Logged-in state: private PV Platform vision page
   if (user) {
     return (
       <PVPlatformPage
@@ -26,41 +25,26 @@ function App() {
     );
   }
 
-  // Portfolio view: Default homepage
   if (view === 'portfolio') {
-    return (
-      <div className="portfolio-shell">
-        <Portfolio onLoginClick={() => setView('login')} />
-      </div>
-    );
+    return <Portfolio onLoginClick={() => setView('login')} />;
   }
 
-  // Auth view: Using shared Button components
   return (
     <AuthShell>
       <div className="auth-tabs">
-        <Button 
-          variant={view === 'login' ? 'primary' : 'secondary'} 
-          onClick={() => setView('login')}
-        >
+        <Button variant={view === 'login' ? 'primary' : 'secondary'} onClick={() => setView('login')}>
           Login
         </Button>
-        <Button 
-          variant={view === 'register' ? 'primary' : 'secondary'} 
-          onClick={() => setView('register')}
-        >
+        <Button variant={view === 'register' ? 'primary' : 'secondary'} onClick={() => setView('register')}>
           Register
         </Button>
       </div>
-      
+
       {view === 'login' ? <Login /> : <Register />}
-      
+
       <div className="auth-back">
-        <button 
-          onClick={() => setView('portfolio')} 
-          className="auth-back-button"
-        >
-          â† Back to Portfolio
+        <button onClick={() => setView('portfolio')} className="auth-back-button">
+          Back to Portfolio
         </button>
       </div>
     </AuthShell>
@@ -68,5 +52,3 @@ function App() {
 }
 
 export default App;
-
-

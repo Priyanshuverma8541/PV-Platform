@@ -1,7 +1,7 @@
-import env from './config/env.js';
-import { connectDatabase } from './config/database.js';
-import app from './app.js';
-import logger from './utils/logger.js';
+import env from './config/env';
+import { connectDatabase } from './config/database';
+import app from './app';
+import logger from './utils/logger';
 
 async function start() {
   await connectDatabase(env.DATABASE_URL);

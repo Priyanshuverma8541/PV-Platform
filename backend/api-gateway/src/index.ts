@@ -1,16 +1,16 @@
-import dotenv from 'dotenv';
+﻿import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { eventBus, EventTypes } from 'pv-core';
-import { logger } from './utils/logger.js';
-import { errorHandler } from './middleware/error.js';
-import { authMiddleware } from './middleware/auth.js';
-import { rateLimiter } from './middleware/rateLimiter.js';
-import { requestLogger } from './middleware/requestLogger.js';
-import { validateRequest } from './middleware/validation.js';
-import config from './config/index.js';
+import { logger } from './utils/logger';
+import { errorHandler } from './middleware/error';
+import { authMiddleware } from './middleware/auth';
+import { rateLimiter } from './middleware/rateLimiter';
+import { requestLogger } from './middleware/requestLogger';
+import { validateRequest } from './middleware/validation';
+import config from './config/index';
 
 dotenv.config();
 
@@ -42,7 +42,7 @@ app.get('/health', (_req, res) => {
       timestamp: new Date().toISOString()
     },
     timestamp: new Date().toISOString(),
-    requestId: _req.requestId
+    requestId: (_req as any).requestId
   });
 });
 
@@ -134,7 +134,7 @@ app.use('*', (req, res) => {
     message: 'Route not found',
     errors: [`Cannot ${req.method} ${req.path}`],
     timestamp: new Date().toISOString(),
-    requestId: req.requestId
+    requestId: (req as any).requestId
   });
 });
 

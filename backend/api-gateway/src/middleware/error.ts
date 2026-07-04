@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse } from 'pv-core';
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 export function errorHandler(
   error: Error,

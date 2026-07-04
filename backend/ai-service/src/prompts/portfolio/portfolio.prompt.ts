@@ -1,4 +1,4 @@
-import type { BuiltPrompt } from '../../services/prompt.service.js';
+import type { BuiltPrompt } from '../../services/prompt.service';
 
 export function portfolioReviewPrompt(data: Record<string, unknown>): BuiltPrompt {
   const { currentContent, targetAudience, goals } = data;

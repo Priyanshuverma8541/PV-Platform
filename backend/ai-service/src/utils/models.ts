@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import type { AIFeature } from '../types/index.js';
+import type { AIFeature } from '../types/index';
 
 /* ── ai_usage ── tracks every call for Mission Control analytics ── */
 const aiUsageSchema = new Schema(

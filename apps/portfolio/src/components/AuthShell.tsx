@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+﻿import { ReactNode } from 'react';
 
 interface AuthShellProps {
   children: ReactNode;
@@ -6,8 +6,9 @@ interface AuthShellProps {
 
 function AuthShell({ children }: AuthShellProps) {
   return (
-    <main>
-      <section>{children}</section>
+    <main className="auth-shell">
+      <div className="auth-shell-bg" aria-hidden="true" />
+      <section className="auth-card">{children}</section>
     </main>
   );
 }

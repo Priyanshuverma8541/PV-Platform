@@ -1,5 +1,5 @@
 import rateLimit from 'express-rate-limit';
-import env from '../config/env.js';
+import env from '../config/env';
 
 /**
  * Global rate limiter — applied to all AI endpoints.

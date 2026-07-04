@@ -1,4 +1,4 @@
-import type { BuiltPrompt } from '../../services/prompt.service.js';
+import type { BuiltPrompt } from '../../services/prompt.service';
 
 export function careerCoachPrompt(data: Record<string, unknown>): BuiltPrompt {
   const { currentRole, skills, experience, targetRole, question, location } = data;

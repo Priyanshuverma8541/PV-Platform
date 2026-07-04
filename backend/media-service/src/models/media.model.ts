@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+﻿import mongoose, { Schema, Document } from 'mongoose';
 import { FileMetadata } from 'pv-core';
 
-export interface MediaDocument extends Document, Omit<FileMetadata, '_id'> {
+export interface MediaDocument extends Document, Omit<FileMetadata, '_id' | 'id'> {
   _id: string;
 }
 

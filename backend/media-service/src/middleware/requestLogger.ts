@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from 'pv-core';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 
 export function requestLogger(req: Request, res: Response, next: NextFunction): void {
   try {

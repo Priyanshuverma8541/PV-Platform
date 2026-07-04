@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "auth-service",
   "version": "0.1.0",
   "private": true,
@@ -9,7 +9,6 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@pv/database": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.3",

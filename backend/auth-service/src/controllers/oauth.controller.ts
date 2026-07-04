@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import oauthConfig from '../config/oauth.js';
+import oauthConfig from '../config/oauth';
 
 export function githubAuth(req: Request, res: Response) {
   const redirectUrl = new URL('https://github.com/login/oauth/authorize');

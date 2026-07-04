@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { generateProposal, generateEmail } from '../controllers/proposal.controller.js';
-import { requireAuth } from '../middleware/auth.js';
-import { aiRateLimiter, strictRateLimiter } from '../middleware/rateLimiter.js';
+import { generateProposal, generateEmail } from '../controllers/proposal.controller';
+import { requireAuth } from '../middleware/auth';
+import { aiRateLimiter, strictRateLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 

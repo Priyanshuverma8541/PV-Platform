@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -13,9 +13,9 @@ const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pv-platf
 const connectDatabase = async (): Promise<void> => {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ MongoDB connected successfully');
+    console.log('âœ… MongoDB connected successfully');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('âŒ MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -53,8 +53,8 @@ const startServer = async () => {
 
     // Start listening
     app.listen(PORT, () => {
-      console.log(`🚀 Project Service (BuildHub) running on port ${PORT}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`ðŸš€ Project Service (BuildHub) running on port ${PORT}`);
+      console.log(`ðŸ“ Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

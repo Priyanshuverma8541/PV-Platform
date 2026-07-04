@@ -1,4 +1,4 @@
-// PV Core - Main entry point
+﻿// PV Core - Main entry point
 // This file exports all core services
 
 // Core Services
@@ -47,5 +47,7 @@ export type {
   UserAnalytics,
   FileMetadata,
   FileUploadOptions,
-  Folder
+  Folder,
+  ApiResponse
 } from './types/index.js';
+

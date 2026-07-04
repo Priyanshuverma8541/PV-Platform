@@ -1,4 +1,4 @@
-import type { BuiltPrompt } from '../../services/prompt.service.js';
+import type { BuiltPrompt } from '../../services/prompt.service';
 
 export function proposalPrompt(data: Record<string, unknown>): BuiltPrompt {
   const { clientName, projectName, projectDescription, budget, timeline, mySkills, myExperience } = data;

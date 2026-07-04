@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+﻿import nodemailer, { type TransportOptions } from 'nodemailer';
 
 interface EmailOptions {
   to: string;
@@ -14,7 +14,7 @@ const createTransporter = () => {
       streamTransport: true,
       newline: true,
       debug: true,
-    });
+    } as TransportOptions);
   }
 
   // For production, use SMTP
@@ -41,13 +41,13 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
     };
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Email would be sent:', mailOptions);
+      console.log('ðŸ“§ Email would be sent:', mailOptions);
     } else {
       await transporter.sendMail(mailOptions);
-      console.log('✅ Email sent successfully');
+      console.log('âœ… Email sent successfully');
     }
   } catch (error) {
-    console.error('❌ Error sending email:', error);
+    console.error('âŒ Error sending email:', error);
     // Don't throw error in development
     if (process.env.NODE_ENV !== 'development') {
       throw error;

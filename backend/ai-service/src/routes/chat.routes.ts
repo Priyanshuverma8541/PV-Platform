@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { chat, getChatHistory } from '../controllers/chat.controller.js';
-import { requireAuth } from '../middleware/auth.js';
-import { aiRateLimiter } from '../middleware/rateLimiter.js';
+import { chat, getChatHistory } from '../controllers/chat.controller';
+import { requireAuth } from '../middleware/auth';
+import { aiRateLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 

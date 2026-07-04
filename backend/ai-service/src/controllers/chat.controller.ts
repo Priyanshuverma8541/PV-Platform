@@ -1,8 +1,8 @@
 import type { Response, NextFunction } from 'express';
-import { routeAIRequest } from '../services/aiRouter.service.js';
-import { buildPrompt } from '../services/prompt.service.js';
-import { AIChat } from '../utils/models.js';
-import type { AuthenticatedRequest } from '../types/index.js';
+import { routeAIRequest } from '../services/aiRouter.service';
+import { buildPrompt } from '../services/prompt.service';
+import { AIChat } from '../utils/models';
+import type { AuthenticatedRequest } from '../types/index';
 import crypto from 'crypto';
 
 export async function chat(req: AuthenticatedRequest, res: Response, next: NextFunction) {

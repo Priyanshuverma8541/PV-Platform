@@ -1,13 +1,13 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
-import config from './config/index.js';
-import logger from './utils/logger.js';
-import { connectDatabase } from './config/database.js';
-import { errorHandler } from './middleware/error.js';
-import { authMiddleware } from './middleware/auth.js';
-import { rateLimiter } from './middleware/rateLimiter.js';
-import { requestLogger } from './middleware/requestLogger.js';
-import mediaRoutes from './routes/media.routes.js';
+import config from './config/index';
+import logger from './utils/logger';
+import { connectDatabase } from './config/database';
+import { errorHandler } from './middleware/error';
+import { authMiddleware } from './middleware/auth';
+import { rateLimiter } from './middleware/rateLimiter';
+import { requestLogger } from './middleware/requestLogger';
+import mediaRoutes from './routes/media.routes';
 import { eventBus, EventTypes } from 'pv-core';
 
 const app = express();
@@ -33,7 +33,7 @@ app.get('/health', (_req, res) => {
       timestamp: new Date().toISOString()
     },
     timestamp: new Date().toISOString(),
-    requestId: (req as any).requestId
+    requestId: (_req as any).requestId
   });
 });
 
@@ -86,3 +86,4 @@ const startServer = async (): Promise<void> => {
 startServer();
 
 export default app;
+

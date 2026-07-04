@@ -1,4 +1,4 @@
-import type { AIRequest, AIResponse } from '../types/index.js';
+import type { AIRequest, AIResponse } from '../types/index';
 
 /**
  * OpenAI provider — plug in when you add OPENAI_API_KEY.

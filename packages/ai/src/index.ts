@@ -1,18 +1,27 @@
-import { apiClient } from '@pv/api-client';
-import type { AIConfig, ChatMessage } from '@pv/types';
+﻿import { apiClient } from '@pv/api-client';
+import type { AIConfig } from '@pv/types';
+
+type ApiEnvelope<T> = {
+  data?: T;
+  content?: string;
+  response?: string;
+  conversationId?: string;
+};
 
 export class AIService {
   private config: AIConfig | null = null;
 
   async getConfig(): Promise<AIConfig> {
     if (!this.config) {
-      this.config = await apiClient.getAIConfig();
+      const response = await apiClient.get<ApiEnvelope<AIConfig> | AIConfig>('/ai/config');
+      this.config = 'data' in response.data && response.data.data ? response.data.data : response.data as AIConfig;
     }
     return this.config;
   }
 
   async updateConfig(config: Partial<AIConfig>): Promise<AIConfig> {
-    this.config = await apiClient.updateAIConfig(config);
+    const response = await apiClient.put<ApiEnvelope<AIConfig> | AIConfig>('/ai/config', config);
+    this.config = 'data' in response.data && response.data.data ? response.data.data : response.data as AIConfig;
     return this.config;
   }
 
@@ -20,7 +29,16 @@ export class AIService {
     response: string;
     conversationId: string;
   }> {
-    return apiClient.chat(message, conversationId);
+    const response = await apiClient.post<ApiEnvelope<{ response: string; conversationId: string }> | { response: string; conversationId: string }>('/ai/chat', {
+      message,
+      conversationId,
+    });
+
+    const payload = 'data' in response.data && response.data.data ? response.data.data : response.data;
+    return {
+      response: payload.response || '',
+      conversationId: payload.conversationId || conversationId || '',
+    };
   }
 
   async generate(prompt: string, options?: {
@@ -29,8 +47,13 @@ export class AIService {
     maxTokens?: number;
     systemPrompt?: string;
   }): Promise<string> {
-    const result = await apiClient.generate(prompt, options);
-    return result.content;
+    const response = await apiClient.post<ApiEnvelope<{ content: string }> | { content: string }>('/ai/generate', {
+      prompt,
+      ...options,
+    });
+
+    const payload = 'data' in response.data && response.data.data ? response.data.data : response.data;
+    return payload.content || '';
   }
 
   async generateResume(userData: any, style: 'professional' | 'creative' | 'minimal' = 'professional'): Promise<string> {
@@ -123,7 +146,8 @@ Provide personalized, actionable career advice.
   }
 
   async getProviders(): Promise<string[]> {
-    return apiClient.getAIProviders();
+    const response = await apiClient.get<ApiEnvelope<string[]> | string[]>('/ai/providers');
+    return Array.isArray(response.data) ? response.data : response.data.data || [];
   }
 }
 

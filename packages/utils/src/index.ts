@@ -1,4 +1,4 @@
-export function formatDate(date: Date | string): string {
+﻿export function formatDate(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -106,7 +106,7 @@ export function retry<T>(
   });
 }
 
-export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
+export function groupBy<T extends object>(array: T[], key: keyof T): Record<string, T[]> {
   return array.reduce((result, item) => {
     const groupKey = String(item[key]);
     if (!result[groupKey]) {
@@ -117,7 +117,7 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
   }, {} as Record<string, T[]>);
 }
 
-export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
   keys.forEach((key) => {
     delete result[key];
@@ -125,7 +125,7 @@ export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   return result;
 }
 
-export function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const result = {} as Pick<T, K>;
   keys.forEach((key) => {
     if (key in obj) {

@@ -1,4 +1,5 @@
-import React, { Suspense, useRef, useState, useEffect } from 'react';
+﻿import React, { Suspense, useRef, useState, useEffect } from 'react';
+import type * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Float, MeshDistortMaterial, Sphere, Box, Torus, Environment, Stars } from '@react-three/drei';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -219,7 +220,7 @@ export default function LandingPage({ onEnter }: { onEnter?: () => void } = {}) 
             transition={{ delay: 1, duration: 1 }}
             className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
           >
-            Portfolio, Career, CRM, Learning, Finance, AI Studio, BuildHub — all in one powerful platform.
+            Portfolio, Career, CRM, Learning, Finance, AI Studio, BuildHub â€” all in one powerful platform.
             Built for creators, developers, and entrepreneurs.
           </motion.p>
 
@@ -378,7 +379,7 @@ export default function LandingPage({ onEnter }: { onEnter?: () => void } = {}) 
       {/* Footer */}
       <footer className="relative z-20 py-12 px-4 border-t border-white/10">
         <div className="max-w-7xl mx-auto text-center text-gray-400">
-          <p>© 2024 PV Platform. All rights reserved.</p>
+          <p>Â© 2024 PV Platform. All rights reserved.</p>
         </div>
       </footer>
     </div>

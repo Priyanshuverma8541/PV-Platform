@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
-import { AIUsage, AIChat } from '../utils/models.js';
-import type { AuthenticatedRequest } from '../types/index.js';
+import { requireAuth } from '../middleware/auth';
+import { AIUsage, AIChat } from '../utils/models';
+import type { AuthenticatedRequest } from '../types/index';
 import type { Response, NextFunction } from 'express';
 
 const router = Router();

@@ -1,10 +1,10 @@
-import { AI_CONFIG } from '../config/ai.config.js';
-import { callGemini } from './gemini.service.js';
-import { callOpenAI } from './openai.service.js';
-import { callClaude } from './claude.service.js';
-import { AIUsage } from '../utils/models.js';
-import logger from '../utils/logger.js';
-import type { AIRequest, AIResponse } from '../types/index.js';
+import { AI_CONFIG } from '../config/ai.config';
+import { callGemini } from './gemini.service';
+import { callOpenAI } from './openai.service';
+import { callClaude } from './claude.service';
+import { AIUsage } from '../utils/models';
+import logger from '../utils/logger';
+import type { AIRequest, AIResponse } from '../types/index';
 
 /**
  * THE single entry point for all AI calls on the PV Platform.

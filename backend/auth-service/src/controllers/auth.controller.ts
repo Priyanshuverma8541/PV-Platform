@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+﻿import { Request, Response } from 'express';
+import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User';
 import { sendEmail } from '../utils/email';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'WEARELEARNINGJWT';
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '7d';
+const JWT_SECRET: Secret = process.env.JWT_SECRET || 'WEARELEARNINGJWT';
+const JWT_EXPIRATION = (process.env.JWT_EXPIRATION || '7d') as SignOptions['expiresIn'];
 
 // Generate JWT Token
 export const generateToken = (userId: string): string => {
@@ -57,7 +57,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(String(user._id));
 
     res.status(201).json({
       success: true,
@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(String(user._id));
 
     res.status(200).json({
       success: true,
@@ -287,3 +287,4 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
   }
 };
+

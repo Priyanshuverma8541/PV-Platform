@@ -13,3 +13,4 @@ export * from './components/StatusBar';
 export * from './components/AIChat';
 export * from './components/NotificationCenter';
 
+export * from './components/Platform';

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 
 export async function connectDatabase(uri: string): Promise<void> {
   if (!uri) {

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_CONFIG } from '../config/ai.config.js';
-import type { AIRequest, AIResponse } from '../types/index.js';
-import logger from '../utils/logger.js';
+import { AI_CONFIG } from '../config/ai.config';
+import type { AIRequest, AIResponse } from '../types/index';
+import logger from '../utils/logger';
 
 let client: GoogleGenerativeAI | null = null;
 
