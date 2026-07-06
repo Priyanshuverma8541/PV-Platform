@@ -4,23 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
-    "@pv/auth": "workspace:*",
-    "@google/generative-ai": "^0.21.0",
+    "@pv/config": "workspace:*",
+    "@pv/database": "workspace:*",
+    "@pv/types": "workspace:*",
+    "@pv/utils": "workspace:*",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.3",
-    "express": "^4.18.4",
-    "express-rate-limit": "^7.4.0",
-    "mongoose": "^7.7.0",
-    "winston": "^3.13.0"
+    "express": "^4.18.4"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.19",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.14.2",
     "tsx": "^4.20.6",
     "typescript": "^5.5.0"

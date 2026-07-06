@@ -1,47 +1,44 @@
 ﻿import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import { connectDatabase } from '@pv/database';
+import { env, corsConfig } from '@pv/config';
+import { logger } from '@pv/utils';
 import projectRoutes from './routes/project.routes';
 
-// Load environment variables
-dotenv.config();
-
-// Database connection
-const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pv-platform';
-
-const connectDatabase = async (): Promise<void> => {
-  try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('âœ… MongoDB connected successfully');
-  } catch (error) {
-    console.error('âŒ MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
-
 const app = express();
-const PORT = process.env.BUILDHUB_SERVICE_PORT || 5013;
+const PORT = env.PORT || 4001;
 
 // Middleware
-app.use(cors());
+app.use(cors(corsConfig));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
 
 // Routes
 app.use('/api/projects', projectRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'project-service' });
+  res.json({
+    success: true,
+    service: 'project-service',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
+  logger.error('Error:', err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
+    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
@@ -52,14 +49,32 @@ const startServer = async () => {
     await connectDatabase();
 
     // Start listening
-    app.listen(PORT, () => {
-      console.log(`ðŸš€ Project Service (BuildHub) running on port ${PORT}`);
-      console.log(`ðŸ“ Environment: ${process.env.NODE_ENV || 'development'}`);
+    const server = app.listen(PORT, () => {
+      logger.info(`🚀 Project Service running on port ${PORT}`);
+      logger.info(`📍 Environment: ${env.NODE_ENV}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
     });
+
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+      logger.info('🛑 Shutting down gracefully...');
+      server.close(() => {
+        logger.info('✅ Server closed');
+        process.exit(0);
+      });
+    });
+
+    return server;
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-startServer();
+// Start if run directly
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
+
+export default app;
+export { startServer };

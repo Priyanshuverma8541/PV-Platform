@@ -1,20 +1,80 @@
-import { connectDatabase } from './config/database';
-import app from './app';
-import config from './config/index';
+import express from 'express';
+import cors from 'cors';
+import { connectDatabase } from '@pv/database';
+import { env, corsConfig } from '@pv/config';
+import { logger } from '@pv/utils';
+import mediaRoutes from './routes/media.routes';
 
-const PORT = config.PORT;
+const app = express();
+const PORT = env.PORT || 4003;
 
-async function start(): Promise<void> {
+// Middleware
+app.use(cors(corsConfig));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
+
+// Routes
+app.use('/api/media', mediaRoutes);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    service: 'media-service',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logger.error('Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+// Start server
+const startServer = async () => {
   try {
-    await connectDatabase(config.DATABASE_URL);
+    // Connect to database
+    await connectDatabase();
 
-    app.listen(PORT, () => {
-      console.log(`Media service listening on http://localhost:${PORT}`);
+    // Start listening
+    const server = app.listen(PORT, () => {
+      logger.info(`🚀 Media Service running on port ${PORT}`);
+      logger.info(`📍 Environment: ${env.NODE_ENV}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
     });
+
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+      logger.info('🛑 Shutting down gracefully...');
+      server.close(() => {
+        logger.info('✅ Server closed');
+        process.exit(0);
+      });
+    });
+
+    return server;
   } catch (error) {
-    console.error('Failed to start media service', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
+};
+
+// Start if run directly
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
 }
 
-start();
+export default app;
+export { startServer };

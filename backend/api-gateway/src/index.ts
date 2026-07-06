@@ -1,181 +1,133 @@
-﻿import dotenv from 'dotenv';
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { eventBus, EventTypes } from 'pv-core';
-import { logger } from './utils/logger';
+import { env, corsConfig, rateLimitConfig } from '@pv/config';
+import { logger } from '@pv/utils';
 import { errorHandler } from './middleware/error';
-import { authMiddleware } from './middleware/auth';
-import { rateLimiter } from './middleware/rateLimiter';
-import { requestLogger } from './middleware/requestLogger';
-import { validateRequest } from './middleware/validation';
-import config from './config/index';
-
-dotenv.config();
 
 const app = express();
-const PORT = config.PORT;
+const PORT = env.PORT || 3000;
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: config.CLIENT_URL,
-  credentials: true,
-}));
-
-// Body parsing - only for non-proxied routes
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Middleware
+app.use(cors(corsConfig));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Request logging
-app.use(requestLogger);
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
 
-// Health check endpoint
-app.get('/health', (_req, res) => {
+// Rate limiting
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: rateLimitConfig.windowMs,
+  max: rateLimitConfig.max,
+  message: {
+    success: false,
+    message: 'Too many requests, please try again later.',
+  },
+});
+
+app.use('/api', limiter);
+
+// Health check
+app.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'API Gateway is healthy',
-    data: {
-      service: 'api-gateway',
-      version: process.env.npm_package_version || '1.0.0',
-      timestamp: new Date().toISOString()
-    },
+    service: 'api-gateway',
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    requestId: (_req as any).requestId
   });
 });
 
-// API versioning
-app.use('/api/v1', rateLimiter, authMiddleware);
+// Proxy routes to backend services
+const services = {
+  auth: env.AUTH_SERVICE_URL || 'http://localhost:4000',
+  project: env.PROJECT_SERVICE_URL || 'http://localhost:4001',
+  ai: env.AI_SERVICE_URL || 'http://localhost:4002',
+  media: env.MEDIA_SERVICE_URL || 'http://localhost:4003',
+};
 
-// Service routes with authentication and rate limiting
-app.use('/api/v1/auth',
-  validateRequest('auth'),
-  createProxyMiddleware({
-    target: config.AUTH_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
+// Auth service proxy
+app.use('/api/auth', createProxyMiddleware({
+  target: services.auth,
+  changeOrigin: true,
+  logger,
+  onProxyReq: (proxyReq) => {
+    logger.info(`Proxying ${proxyReq.method} ${proxyReq.path} to auth-service`);
+  },
+}));
 
-app.use('/api/v1/ai',
-  validateRequest('ai'),
-  createProxyMiddleware({
-    target: config.AI_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
+// Project service proxy
+app.use('/api/projects', createProxyMiddleware({
+  target: services.project,
+  changeOrigin: true,
+  logger,
+  onProxyReq: (proxyReq) => {
+    logger.info(`Proxying ${proxyReq.method} ${proxyReq.path} to project-service`);
+  },
+}));
 
-app.use('/api/v1/media',
-  validateRequest('media'),
-  createProxyMiddleware({
-    target: config.MEDIA_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
+// AI service proxy
+app.use('/api/ai', createProxyMiddleware({
+  target: services.ai,
+  changeOrigin: true,
+  logger,
+  onProxyReq: (proxyReq) => {
+    logger.info(`Proxying ${proxyReq.method} ${proxyReq.path} to ai-service`);
+  },
+}));
 
-app.use('/api/v1/notifications',
-  validateRequest('notifications'),
-  createProxyMiddleware({
-    target: config.NOTIFICATION_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
+// Media service proxy
+app.use('/api/media', createProxyMiddleware({
+  target: services.media,
+  changeOrigin: true,
+  logger,
+  onProxyReq: (proxyReq) => {
+    logger.info(`Proxying ${proxyReq.method} ${proxyReq.path} to media-service`);
+  },
+}));
 
-app.use('/api/v1/search',
-  validateRequest('search'),
-  createProxyMiddleware({
-    target: config.SEARCH_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
-
-app.use('/api/v1/analytics',
-  validateRequest('analytics'),
-  createProxyMiddleware({
-    target: config.ANALYTICS_SERVICE_URL,
-    changeOrigin: true,
-  })
-);
-
-// Application service routes (Phase 2-5)
-const appServices = [
-  'portfolio',
-  'career',
-  'resume',
-  'learning',
-  'crm',
-  'finance',
-  'marketplace',
-  'blog',
-  'buildhub'
-];
-
-appServices.forEach(service => {
-  const serviceUrl = process.env[`${service.toUpperCase()}_SERVICE_URL`];
-  if (serviceUrl) {
-    app.use(`/api/v1/${service}`,
-      validateRequest(service),
-      createProxyMiddleware({
-        target: serviceUrl,
-        changeOrigin: true,
-      })
-    );
-  }
-});
-
-// Error handling
+// Error handling middleware
 app.use(errorHandler);
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-    errors: [`Cannot ${req.method} ${req.path}`],
-    timestamp: new Date().toISOString(),
-    requestId: (req as any).requestId
-  });
-});
-
 // Start server
-app.listen(PORT, () => {
-  logger.info(`API Gateway listening on http://localhost:${PORT}`);
-  console.log(`API Gateway listening on http://localhost:${PORT}`);
+const startServer = async () => {
+  try {
+    const server = app.listen(PORT, () => {
+      logger.info(`🚀 API Gateway running on port ${PORT}`);
+      logger.info(`📍 Environment: ${env.NODE_ENV}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+      logger.info(`📡 Proxying to:`);
+      logger.info(`   - Auth: ${services.auth}`);
+      logger.info(`   - Project: ${services.project}`);
+      logger.info(`   - AI: ${services.ai}`);
+      logger.info(`   - Media: ${services.media}`);
+    });
 
-  // Emit startup event
-  eventBus.emit({
-    type: EventTypes.SERVICE_STARTED,
-    payload: {
-      service: 'api-gateway',
-      port: PORT,
-      version: process.env.npm_package_version || '1.0.0'
-    },
-    metadata: {
-      source: 'api-gateway'
-    }
-  });
-});
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+      logger.info('🛑 Shutting down gracefully...');
+      server.close(() => {
+        logger.info('✅ Server closed');
+        process.exit(0);
+      });
+    });
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM signal received: closing HTTP server');
-  await eventBus.emit({
-    type: 'service.shutdown',
-    payload: { service: 'api-gateway' },
-    metadata: { source: 'api-gateway' }
-  });
-  process.exit(0);
-});
+    return server;
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-process.on('SIGINT', async () => {
-  logger.info('SIGINT signal received: closing HTTP server');
-  await eventBus.emit({
-    type: 'service.shutdown',
-    payload: { service: 'api-gateway' },
-    metadata: { source: 'api-gateway' }
-  });
-  process.exit(0);
-});
+// Start if run directly
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;
+export { startServer };

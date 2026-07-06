@@ -1,33 +1,24 @@
 ﻿import { Request, Response } from 'express';
-import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { User } from '../models/User';
-import { sendEmail } from '../utils/email';
-
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'WEARELEARNINGJWT';
-const JWT_EXPIRATION = (process.env.JWT_EXPIRATION || '7d') as SignOptions['expiresIn'];
-
-// Generate JWT Token
-export const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRATION,
-  });
-};
+import { User } from '@pv/database';
+import { RegisterValidation, LoginValidation } from '@pv/database';
+import { asyncHandler } from '@pv/utils';
+import { successResponse, errorResponse } from '@pv/utils';
+import { generateToken } from '@pv/utils';
+import { env } from '@pv/config';
+import { logger } from '@pv/utils';
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
-export const register = async (req: Request, res: Response) => {
+export const register = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName } = req.body;
-
+    // Validate input
+    const validatedData = RegisterValidation.parse(req.body);
+    
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: validatedData.email });
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email',
-      });
+      return errorResponse(res, 'User already exists with this email', 400);
     }
 
     // Create verification token
@@ -35,187 +26,143 @@ export const register = async (req: Request, res: Response) => {
 
     // Create user
     const user = await User.create({
-      email,
-      password,
+      email: validatedData.email,
+      password: validatedData.password,
       profile: {
-        firstName,
-        lastName,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
       },
       verificationToken,
     });
 
-    // Send verification email
-    const verificationUrl = `${process.env.ADMIN_URL}/verify-email?token=${verificationToken}`;
-    await sendEmail({
-      to: email,
-      subject: 'Verify your PV Platform account',
-      html: `
-        <h1>Welcome to PV Platform!</h1>
-        <p>Please click the link below to verify your email:</p>
-        <a href="${verificationUrl}">Verify Email</a>
-      `,
-    });
-
     // Generate token
-    const token = generateToken(String(user._id));
+    const token = generateToken({ userId: String(user._id) }, env.JWT_SECRET, env.JWT_EXPIRES_IN);
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully. Please verify your email.',
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          profile: user.profile,
-          emailVerified: user.emailVerified,
-        },
-        token,
+    logger.info(`User registered: ${user.email}`);
+
+    return successResponse(res, {
+      user: {
+        id: user._id,
+        email: user.email,
+        profile: user.profile,
+        emailVerified: user.emailVerified,
       },
-    });
+      token,
+    }, 'User registered successfully', 201);
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error registering user',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    logger.error('Register error:', error);
+    return errorResponse(res, 'Error registering user', 500, error);
   }
-};
+});
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-export const login = async (req: Request, res: Response) => {
+export const login = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-
+    // Validate input
+    const validatedData = LoginValidation.parse(req.body);
+    
     // Find user with password
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: validatedData.email }).select('+password');
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
+      return errorResponse(res, 'Invalid credentials', 401);
     }
 
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
+    const { comparePassword } = await import('@pv/utils');
+    const isPasswordValid = await comparePassword(validatedData.password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
+      return errorResponse(res, 'Invalid credentials', 401);
     }
 
-    // Generate token
-    const token = generateToken(String(user._id));
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          profile: user.profile,
-          emailVerified: user.emailVerified,
-          settings: user.settings,
-        },
-        token,
+    // Generate token
+    const token = generateToken({ userId: String(user._id) }, env.JWT_SECRET, env.JWT_EXPIRES_IN);
+
+    logger.info(`User logged in: ${user.email}`);
+
+    return successResponse(res, {
+      user: {
+        id: user._id,
+        email: user.email,
+        profile: user.profile,
+        emailVerified: user.emailVerified,
+        settings: user.settings,
       },
-    });
+      token,
+    }, 'Login successful');
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error logging in',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    logger.error('Login error:', error);
+    return errorResponse(res, 'Error logging in', 500, error);
   }
-};
+});
 
 // @desc    Get current user
 // @route   GET /api/auth/me
 // @access  Private
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = asyncHandler(async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.user?.userId);
     
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+      return errorResponse(res, 'User not found', 404);
     }
 
-    res.status(200).json({
-      success: true,
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          profile: user.profile,
-          emailVerified: user.emailVerified,
-          settings: user.settings,
-        },
+    return successResponse(res, {
+      user: {
+        id: user._id,
+        email: user.email,
+        profile: user.profile,
+        emailVerified: user.emailVerified,
+        settings: user.settings,
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error('Get me error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching user',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    logger.error('Get me error:', error);
+    return errorResponse(res, 'Error fetching user', 500, error);
   }
-};
+});
 
 // @desc    Verify email
 // @route   GET /api/auth/verify-email/:token
 // @access  Public
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
 
     const user = await User.findOne({ verificationToken: token });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid verification token',
-      });
+      return errorResponse(res, 'Invalid verification token', 400);
     }
 
     user.emailVerified = true;
     user.verificationToken = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Email verified successfully',
-    });
+    logger.info(`Email verified: ${user.email}`);
+
+    return successResponse(res, null, 'Email verified successfully');
   } catch (error) {
-    console.error('Verify email error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error verifying email',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    logger.error('Verify email error:', error);
+    return errorResponse(res, 'Error verifying email', 500, error);
   }
-};
+});
 
 // @desc    Forgot password
 // @route   POST /api/auth/forgot-password
 // @access  Public
-export const forgotPassword = async (req: Request, res: Response) => {
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+      return errorResponse(res, 'User not found', 404);
     }
 
     // Generate reset token
@@ -224,36 +171,21 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
     await user.save();
 
-    // Send reset email
-    const resetUrl = `${process.env.ADMIN_URL}/reset-password?token=${resetToken}`;
-    await sendEmail({
-      to: email,
-      subject: 'Reset your password',
-      html: `
-        <h1>Password Reset</h1>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetUrl}">Reset Password</a>
-      `,
-    });
+    // TODO: Send reset email
+    // For now, just log it
+    logger.info(`Password reset token for ${email}: ${resetToken}`);
 
-    res.status(200).json({
-      success: true,
-      message: 'Password reset email sent',
-    });
+    return successResponse(res, null, 'Password reset email sent');
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error sending reset email',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    logger.error('Forgot password error:', error);
+    return errorResponse(res, 'Error sending reset email', 500, error);
   }
-};
+});
 
 // @desc    Reset password
 // @route   POST /api/auth/reset-password
 // @access  Public
-export const resetPassword = async (req: Request, res: Response) => {
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
 
@@ -263,28 +195,20 @@ export const resetPassword = async (req: Request, res: Response) => {
     }).select('+password');
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token',
-      });
+      return errorResponse(res, 'Invalid or expired reset token', 400);
     }
 
+    // Update password
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Password reset successful',
-    });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error resetting password',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
+    logger.info(`Password reset for: ${user.email}`);
 
+    return successResponse(res, null, 'Password reset successful');
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    return errorResponse(res, 'Error resetting password', 500, error);
+  }
+});

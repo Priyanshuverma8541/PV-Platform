@@ -1,11 +1,14 @@
 import { Router } from 'express';
-import { generateProposal, generateEmail } from '../controllers/proposal.controller';
-import { requireAuth } from '../middleware/auth';
-import { aiRateLimiter, strictRateLimiter } from '../middleware/rateLimiter';
+import { generateProposal, improveProposal } from '../controllers/proposal.controller';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
-router.post('/', requireAuth, strictRateLimiter, generateProposal);
-router.post('/email', requireAuth, aiRateLimiter, generateEmail);
+// All routes require authentication
+router.use(authenticate);
+
+// Proposal routes
+router.post('/generate', generateProposal);
+router.post('/improve', improveProposal);
 
 export default router;

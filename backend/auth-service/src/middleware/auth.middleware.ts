@@ -1,8 +1,8 @@
 ﻿import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { User } from '../models/User';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'WEARELEARNINGJWT';
+import { verifyToken } from '@pv/utils';
+import { env } from '@pv/config';
+import { User } from '@pv/database';
+import { logger } from '@pv/utils';
 
 // Extend Request type to include user
 declare global {
@@ -29,7 +29,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+      const decoded = verifyToken(token, env.JWT_SECRET);
       
       // Get user from database
       const user = await User.findById(decoded.userId);
@@ -55,7 +55,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       });
     }
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    logger.error('Auth middleware error:', error);
     res.status(500).json({
       success: false,
       message: 'Authentication error',
@@ -70,7 +70,8 @@ export const optionalAuthenticate = async (req: Request, res: Response, next: Ne
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+        const decoded = verifyToken(token, env.JWT_SECRET);
+        
         const user = await User.findById(decoded.userId);
         
         if (user) {
@@ -80,13 +81,13 @@ export const optionalAuthenticate = async (req: Request, res: Response, next: Ne
           };
         }
       } catch (error) {
-        // Ignore invalid tokens for optional auth
+        // Silently ignore invalid tokens for optional auth
       }
     }
 
     next();
   } catch (error) {
-    console.error('Optional auth middleware error:', error);
+    logger.error('Optional auth middleware error:', error);
     next();
   }
 };

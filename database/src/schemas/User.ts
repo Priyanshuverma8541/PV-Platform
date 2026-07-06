@@ -1,69 +1,34 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import { z } from 'zod';
 
-export interface IUser extends Document {
-  email: string;
-  username: string;
-  password: string;
-  profile: {
-    firstName: string;
-    lastName: string;
-    avatar: string;
-    bio: string;
-  };
-  oauth?: {
-    google?: { id: string; email: string };
-    github?: { id: string; username: string };
-  };
-  settings: {
-    twoFactorEnabled: boolean;
-    emailNotifications: boolean;
-    theme: 'light' | 'dark';
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const UserSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  profile: {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    avatar: { type: String, default: '' },
-    bio: { type: String, default: '' }
-  },
-  oauth: {
-    google: {
-      id: String,
-      email: String
-    },
-    github: {
-      id: String,
-      username: String
-    }
-  },
-  settings: {
-    twoFactorEnabled: { type: Boolean, default: false },
-    emailNotifications: { type: Boolean, default: true },
-    theme: { type: String, enum: ['light', 'dark'], default: 'light' }
-  }
-}, {
-  timestamps: true
+export const UserValidation = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  phone: z.string().optional(),
+  bio: z.string().max(500, 'Bio cannot exceed 500 characters').optional(),
 });
 
-export const User = mongoose.model<IUser>('User', UserSchema);
+export const RegisterValidation = UserValidation.extend({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+export const LoginValidation = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const UpdateProfileValidation = z.object({
+  firstName: z.string().min(1, 'First name is required').optional(),
+  lastName: z.string().min(1, 'Last name is required').optional(),
+  phone: z.string().optional(),
+  bio: z.string().max(500, 'Bio cannot exceed 500 characters').optional(),
+  location: z.string().optional(),
+  website: z.string().url('Invalid website URL').optional(),
+  socialLinks: z.object({
+    linkedin: z.string().url().optional(),
+    github: z.string().url().optional(),
+    twitter: z.string().url().optional(),
+    portfolio: z.string().url().optional(),
+  }).optional(),
+});

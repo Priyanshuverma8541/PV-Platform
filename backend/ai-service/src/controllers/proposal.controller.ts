@@ -1,50 +1,62 @@
-import type { Response, NextFunction } from 'express';
-import { routeAIRequest } from '../services/aiRouter.service';
-import { buildPrompt } from '../services/prompt.service';
-import type { AuthenticatedRequest } from '../types/index';
+import { Request, Response } from 'express';
+import { asyncHandler } from '@pv/utils';
+import { successResponse, errorResponse } from '@pv/utils';
+import { logger } from '@pv/utils';
 
-export async function generateProposal(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+// @desc    Generate proposal
+// @route   POST /api/ai/proposal/generate
+// @access  Private
+export const generateProposal = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const data = req.body as Record<string, unknown>;
+    const { clientId, projectDetails, tone } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!data.projectDescription) {
-      return res.status(400).json({ message: 'projectDescription is required.' });
+    if (!clientId || !projectDetails) {
+      return errorResponse(res, 'Client ID and project details are required', 400);
     }
 
-    const { userPrompt, systemPrompt } = buildPrompt({ feature: 'proposal', data });
+    // TODO: Integrate with AI to generate proposal
+    logger.info(`Proposal generation request from user ${userId}`);
 
-    const result = await routeAIRequest({
-      prompt: userPrompt,
-      systemPrompt,
-      userId: req.user?.userId,
-      feature: 'proposal',
-    });
+    const proposal = {
+      clientId,
+      projectDetails,
+      tone: tone || 'professional',
+      content: 'This is a placeholder proposal. AI integration coming soon!',
+      generatedAt: new Date().toISOString(),
+    };
 
-    res.json({ proposal: result.content, provider: result.provider });
+    return successResponse(res, proposal, 'Proposal generated successfully');
   } catch (error) {
-    next(error);
+    logger.error('Generate proposal error:', error);
+    return errorResponse(res, 'Error generating proposal', 500, error);
   }
-}
+});
 
-export async function generateEmail(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+// @desc    Improve proposal
+// @route   POST /api/ai/proposal/improve
+// @access  Private
+export const improveProposal = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const data = req.body as Record<string, unknown>;
+    const { proposal, improvementType } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!data.context) {
-      return res.status(400).json({ message: 'context is required.' });
+    if (!proposal) {
+      return errorResponse(res, 'Proposal is required', 400);
     }
 
-    const { userPrompt, systemPrompt } = buildPrompt({ feature: 'email', data });
+    // TODO: Integrate with AI to improve proposal
+    logger.info(`Proposal improvement request from user ${userId}`);
 
-    const result = await routeAIRequest({
-      prompt: userPrompt,
-      systemPrompt,
-      userId: req.user?.userId,
-      feature: 'email',
-    });
+    const improvedProposal = {
+      original: proposal,
+      improved: proposal, // Placeholder
+      improvements: [],
+    };
 
-    res.json({ email: result.content, provider: result.provider });
+    return successResponse(res, improvedProposal, 'Proposal improved successfully');
   } catch (error) {
-    next(error);
+    logger.error('Improve proposal error:', error);
+    return errorResponse(res, 'Error improving proposal', 500, error);
   }
-}
+});

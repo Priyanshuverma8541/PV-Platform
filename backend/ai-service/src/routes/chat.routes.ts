@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import { chat, getChatHistory } from '../controllers/chat.controller';
-import { requireAuth } from '../middleware/auth';
-import { aiRateLimiter } from '../middleware/rateLimiter';
+import { chat } from '../controllers/chat.controller';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
-router.post('/', requireAuth, aiRateLimiter, chat);
-router.get('/history/:sessionId', requireAuth, getChatHistory);
+// All routes require authentication
+router.use(authenticate);
+
+// Chat routes
+router.post('/', chat);
 
 export default router;

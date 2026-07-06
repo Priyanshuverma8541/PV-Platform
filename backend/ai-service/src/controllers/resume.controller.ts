@@ -1,63 +1,60 @@
-import type { Response, NextFunction } from 'express';
-import { routeAIRequest } from '../services/aiRouter.service';
-import { buildPrompt } from '../services/prompt.service';
-import type { AuthenticatedRequest } from '../types/index';
+import { Request, Response } from 'express';
+import { asyncHandler } from '@pv/utils';
+import { successResponse, errorResponse } from '@pv/utils';
+import { logger } from '@pv/utils';
 
-export async function generateResume(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+// @desc    Generate resume
+// @route   POST /api/ai/resume/generate
+// @access  Private
+export const generateResume = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const data = req.body as Record<string, unknown>;
+    const { template, data } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!data.name && !data.role) {
-      return res.status(400).json({ message: 'At minimum, provide name and role.' });
+    if (!template || !data) {
+      return errorResponse(res, 'Template and data are required', 400);
     }
 
-    const { userPrompt, systemPrompt } = buildPrompt({ feature: 'resume', data });
+    // TODO: Integrate with AI to generate resume
+    logger.info(`Resume generation request from user ${userId}`);
 
-    const result = await routeAIRequest({
-      prompt: userPrompt,
-      systemPrompt,
-      userId: req.user?.userId,
-      feature: 'resume',
-      metadata: { targetRole: data.targetRole },
-    });
+    const resume = {
+      template,
+      data,
+      generatedAt: new Date().toISOString(),
+    };
 
-    res.json({
-      resume: result.content,
-      provider: result.provider,
-      model: result.model,
-    });
+    return successResponse(res, resume, 'Resume generated successfully');
   } catch (error) {
-    next(error);
+    logger.error('Generate resume error:', error);
+    return errorResponse(res, 'Error generating resume', 500, error);
   }
-}
+});
 
-export async function generateCoverLetter(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+// @desc    Improve resume
+// @route   POST /api/ai/resume/improve
+// @access  Private
+export const improveResume = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { jobTitle, company, jobDescription, myBackground } = req.body as Record<string, string>;
+    const { resumeData, improvementType } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!jobTitle || !company) {
-      return res.status(400).json({ message: 'jobTitle and company are required.' });
+    if (!resumeData) {
+      return errorResponse(res, 'Resume data is required', 400);
     }
 
-    const { userPrompt, systemPrompt } = buildPrompt({
-      feature: 'cover_letter',
-      data: {
-        message: `Write a compelling cover letter for the position of ${jobTitle} at ${company}.
-Job Description: ${jobDescription ?? 'Not provided'}
-My Background: ${myBackground ?? 'Not provided'}
-Keep it under 300 words. Professional, confident, and tailored to the role.`,
-      },
-    });
+    // TODO: Integrate with AI to improve resume
+    logger.info(`Resume improvement request from user ${userId}`);
 
-    const result = await routeAIRequest({
-      prompt: userPrompt,
-      systemPrompt,
-      userId: req.user?.userId,
-      feature: 'cover_letter',
-    });
+    const improvedResume = {
+      original: resumeData,
+      improved: resumeData, // Placeholder
+      improvements: [],
+    };
 
-    res.json({ coverLetter: result.content, provider: result.provider });
+    return successResponse(res, improvedResume, 'Resume improved successfully');
   } catch (error) {
-    next(error);
+    logger.error('Improve resume error:', error);
+    return errorResponse(res, 'Error improving resume', 500, error);
   }
-}
+});

@@ -1,24 +1,16 @@
 import { Router } from 'express';
-import { mediaController } from '../controllers/media.controller';
-import { authMiddleware } from '../middleware/auth';
-import { rateLimiter } from '../middleware/rateLimiter';
+import { uploadMedia, getMedia, getMediaById, deleteMedia } from '../controllers/media.controller';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
 // All routes require authentication
-router.use(authMiddleware);
-router.use(rateLimiter);
+router.use(authenticate);
 
-// POST /api/media/upload - Upload a file
-router.post('/upload', mediaController.uploadFile.bind(mediaController));
-
-// GET /api/media/files - Get user's files
-router.get('/files', mediaController.getFiles.bind(mediaController));
-
-// GET /api/media/files/:id - Get a specific file
-router.get('/files/:id', mediaController.getFile.bind(mediaController));
-
-// DELETE /api/media/files/:id - Delete a file
-router.delete('/files/:id', mediaController.deleteFile.bind(mediaController));
+// Media routes
+router.post('/upload', uploadMedia);
+router.get('/', getMedia);
+router.get('/:id', getMediaById);
+router.delete('/:id', deleteMedia);
 
 export default router;

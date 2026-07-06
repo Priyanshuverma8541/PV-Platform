@@ -1,69 +1,33 @@
-import type { Response, NextFunction } from 'express';
-import { routeAIRequest } from '../services/aiRouter.service';
-import { buildPrompt } from '../services/prompt.service';
-import { AIChat } from '../utils/models';
-import type { AuthenticatedRequest } from '../types/index';
-import crypto from 'crypto';
+import { Request, Response } from 'express';
+import { asyncHandler } from '@pv/utils';
+import { successResponse, errorResponse } from '@pv/utils';
+import { logger } from '@pv/utils';
 
-export async function chat(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+// @desc    Chat with AI
+// @route   POST /api/ai/chat
+// @access  Private
+export const chat = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { message, sessionId } = req.body as { message: string; sessionId?: string };
+    const { message, context } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!message?.trim()) {
-      return res.status(400).json({ message: 'message is required.' });
+    if (!message) {
+      return errorResponse(res, 'Message is required', 400);
     }
 
-    const { userPrompt, systemPrompt } = buildPrompt({
-      feature: 'chat',
-      data: { message },
-    });
+    // TODO: Integrate with AI provider (Gemini/OpenAI/Claude)
+    // For now, return a placeholder response
+    logger.info(`AI chat request from user ${userId}: ${message}`);
 
-    const result = await routeAIRequest({
-      prompt: userPrompt,
-      systemPrompt,
-      userId: req.user?.userId,
-      feature: 'chat',
-    });
+    const response = {
+      message: 'This is a placeholder response. AI integration coming soon!',
+      context: context || {},
+      timestamp: new Date().toISOString(),
+    };
 
-    // Persist to chat history
-    const sid = sessionId ?? crypto.randomUUID();
-    if (req.user?.userId) {
-      AIChat.findOneAndUpdate(
-        { userId: req.user.userId, sessionId: sid, feature: 'chat' },
-        {
-          $push: {
-            messages: [
-              { role: 'user', content: message },
-              { role: 'assistant', content: result.content },
-            ],
-          },
-          $set: { provider: result.provider, model: result.model },
-        },
-        { upsert: true }
-      ).catch(() => {}); // fire and forget
-    }
-
-    res.json({
-      content: result.content,
-      sessionId: sid,
-      provider: result.provider,
-      model: result.model,
-    });
+    return successResponse(res, response, 'AI response generated');
   } catch (error) {
-    next(error);
+    logger.error('Chat error:', error);
+    return errorResponse(res, 'Error processing chat', 500, error);
   }
-}
-
-export async function getChatHistory(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  try {
-    const { sessionId } = req.params;
-    const userId = req.user!.userId;
-
-    const chat = await AIChat.findOne({ userId, sessionId, feature: 'chat' });
-    if (!chat) return res.status(404).json({ message: 'Session not found.' });
-
-    res.json({ messages: chat.messages, sessionId });
-  } catch (error) {
-    next(error);
-  }
-}
+});
